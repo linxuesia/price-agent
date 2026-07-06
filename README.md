@@ -13,8 +13,11 @@
 </p>
 
 <p align="center">
-  <a href="https://linxuesia.github.io/price-agent/demo.html">
+  <a href="https://sia666-price-agent.hf.space">
     <img src="https://img.shields.io/badge/demo-在线演示-blue?style=for-the-badge" alt="在线演示"/>
+  </a>
+  <a href="https://huggingface.co/spaces/sia666/price-agent">
+    <img src="https://img.shields.io/badge/Deploy_on-HuggingFace-FF9D00?style=for-the-badge&logo=huggingface" alt="HuggingFace"/>
   </a>
 </p>
 
