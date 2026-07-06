@@ -30,6 +30,26 @@ import uvicorn
 from calc import calculate, generate_quotation, _load_config
 
 # ============================================================
+# 加载 .env 文件
+# ============================================================
+def _load_dotenv():
+    """从项目根目录 .env 文件加载环境变量（不覆盖已有环境变量）"""
+    env_file = Path(__file__).parent / ".env"
+    if not env_file.exists():
+        return
+    with open(env_file, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, val = line.partition("=")
+            key, val = key.strip(), val.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = val
+
+_load_dotenv()
+
+# ============================================================
 # 配置
 # ============================================================
 APP_ID = os.getenv("FEISHU_APP_ID", "")
