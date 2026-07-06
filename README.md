@@ -13,8 +13,11 @@
 </p>
 
 <p align="center">
-  <a href="https://linxuesia.github.io/price-agent/">
+  <a href="https://render.com/deploy?repo=https://github.com/linxuesia/price-agent">
     <img src="https://img.shields.io/badge/demo-在线演示-blue?style=for-the-badge" alt="在线演示"/>
+  </a>
+  <a href="https://render.com/deploy?repo=https://github.com/linxuesia/price-agent">
+    <img src="https://img.shields.io/badge/Deploy_to-Render-46E3B7?style=for-the-badge&logo=render" alt="Deploy to Render"/>
   </a>
 </p>
 

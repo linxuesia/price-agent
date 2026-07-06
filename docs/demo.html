@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>门窗报价助手 - 在线演示</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --radius: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  gap: 16px;
+}
+.app {
+  width: 100%;
+  max-width: 600px;
+  height: 92vh;
+  max-height: 900px;
+  background: var(--surface);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.header {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.header h1 { font-size: 18px; font-weight: 600; }
+.header .gear { cursor: pointer; font-size: 18px; opacity: .7; }
+.header .gear:hover { opacity: 1; }
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.msg {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.msg-bot { background: #f1f5f9; align-self: flex-start; border-bottom-left-radius: 4px; }
+.msg-user { background: #2563eb; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+.msg-info { background: #eff6ff; border: 1px solid #bfdbfe; align-self: stretch; font-size: 13px; }
+.msg-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; align-self: stretch; font-size: 13px; }
+.msg-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #065f46; align-self: stretch; font-size: 13px; }
+
+.upload-zone {
+  padding: 20px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+.upload-area {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.upload-area:hover { border-color: #2563eb; color: #2563eb; background: #f8faff; }
+.upload-area.dragover { border-color: #2563eb; background: #eff6ff; }
+.upload-area input[type=file] { display: none; }
+
+.quotation {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.quotation-header {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.quotation-header .copy-btn {
+  background: #334155;
+  color: #e2e8f0;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+}
+.quotation-content { padding: 12px; overflow-x: auto; white-space: pre; }
+
+.settings-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.settings-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+}
+.settings-card h3 { margin-bottom: 12px; }
+.settings-card input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 12px;
+}
+.settings-card input:focus { border-color: #2563eb; }
+.settings-card .actions { display: flex; gap: 8px; justify-content: flex-end; }
+.btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+}
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-secondary { background: #f1f5f9; color: var(--text); }
+
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid #cbd5e1;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.back-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  color: rgba(255,255,255,.8);
+  text-decoration: none;
+  font-size: 13px;
+  z-index: 10;
+}
+.back-link:hover { color: #fff; }
+
+@media (max-width: 640px) {
+  body { padding: 0; }
+  .app { max-width: 100%; height: 100vh; max-height: 100vh; border-radius: 0; }
+  .back-link { display: none; }
+}
+</style>
+</head>
+<body>
+
+<a href="https://linxuesia.github.io/price-agent/" class="back-link">← 项目首页</a>
+<div class="app">
+  <div class="header">
+    <h1>门窗报价助手</h1>
+    <span class="gear" onclick="toggleSettings()" title="设置 API Key">⚙</span>
+  </div>
+  <div class="messages" id="messages">
+    <div class="msg msg-bot">你好！我是门窗报价助手 🤖<br>上传 PDF 门窗图纸，我会自动识别窗户尺寸并生成报价单。<br><br>💡 <b>提示</b>：没有图纸？可以上传仓库中的 <a href="https://github.com/linxuesia/price-agent/blob/master/sample.pdf" target="_blank">sample.pdf</a> 测试。</div>
+  </div>
+  <div class="upload-zone">
+    <label class="upload-area" id="dropZone">
+      <input type="file" id="fileInput" accept=".pdf" onchange="handleFile(this.files[0])">
+      📄 点击或拖拽上传 PDF 图纸
+    </label>
+  </div>
+</div>
+
+<div class="settings-modal" id="settingsModal" style="display:none">
+  <div class="settings-card">
+    <h3>API Key 设置</h3>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">输入智谱 API Key，浏览器本地存储，仅用于调用 AI 识别。</p>
+    <input id="apiKeyInput" type="password" placeholder="输入智谱 API Key">
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="toggleSettings()">取消</button>
+      <button class="btn btn-primary" onclick="saveApiKey()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ====== Pricing Config ======
+const PRICING = {
+  profile: [
+    { keywords: ["全景平移门","全景平开门","天域200"], area_price: 980, sash_price: 1680, sash_name: "全景平移门 开启页" },
+    { keywords: ["安能推拉窗","推拉窗"], area_price: 599, sash_price: 0, sash_name: null },
+    { keywords: ["中铝110E","外开窗"], area_price: 580, sash_price: 580, sash_name: "中铝110E系列外开窗 开启页" },
+    { keywords: ["19分贝","内开内倒","内开系列","S97","s97"], area_price: 799, sash_price: 899, sash_name: "S97系列内开内倒 开启页" },
+    { keywords: ["测压门","侧压门","120系列"], area_price: 880, sash_price: 880, sash_name: "120系列测压门 开启页" }
+  ],
+  thickening: [
+    { spec: ["6mm+6mm","6+6"], price: 128 },
+    { spec: ["8mm+8mm","8+8"], price: 428 },
+    { spec: ["10mm+10mm","10+10"], price: 628 },
+    { spec: ["12mm+12mm","12+12"], price: 780 }
+  ],
+  accessories: { screen_sash: 500, screen_door: 480, smart_lock: 1580 },
+  default_color: "物业色",
+  fixes: {
+    "C1-楼重型门":"C1一楼重型门","C2-楼中厨":"C2一楼中厨","C3-楼卫生间":"C3一楼卫生间",
+    "C3-1":"C3一楼卫生间","C3":"C3一楼卫生间","A1":"C9三楼起居室"
+  }
+};
+
+function matchProfile(profileStr) {
+  if (!profileStr) return null;
+  for (const item of PRICING.profile) {
+    for (const kw of item.keywords) {
+      if (profileStr.includes(kw)) return item;
+    }
+  }
+  return null;
+}
+
+function matchThickeningPrice(spec) {
+  if (!spec) return null;
+  let s = spec.replace(/\s+/g, '').replace(/mm/g, '');
+  const prefixes = ['加厚至','加厚','加厚到'];
+  for (const p of prefixes) { if (s.startsWith(p)) s = s.substring(p.length); }
+  const sClean = s.replace(/mm/g, '').replace(/\s+/g, '');
+  for (const item of PRICING.thickening) {
+    for (const alias of item.spec) {
+      const a = alias.replace(/\s+/g, '').replace(/mm/g, '');
+      if (a === sClean || a.includes(sClean) || sClean.includes(a)) return item.price;
+    }
+  }
+  return null;
+}
+
+function calculate(w) {
+  const areaSqm = (w.width * w.height) / 1000000;
+  const pricing = matchProfile(w.profile || '');
+  if (!pricing) return { area_sqm: areaSqm, error: `未找到型材「${w.profile}」的定价` };
+
+  const areaTotal = areaSqm * pricing.area_price;
+  const sashTotal = (w.opening_sashes || 0) * pricing.sash_price;
+
+  const thickeningItems = [];
+  let thickeningTotal = 0;
+  for (const t of (w.thickening || [])) {
+    const tArea = parseFloat(String(t.area).replace(/[m²㎡2]/g, '').trim()) || 0;
+    const tPrice = matchThickeningPrice(t.spec || '');
+    if (tPrice && tArea > 0) {
+      const cost = Math.round(tArea * tPrice * 100) / 100;
+      thickeningItems.push({ area: tArea, spec: t.spec, unit_price: tPrice, total: cost });
+      thickeningTotal += cost;
+    }
+  }
+
+  const accessories = [];
+  const acc = PRICING.accessories;
+  const screens = w.screen_sashes || 0;
+  const doors = w.screen_doors || 0;
+  const lock = w.smart_lock || false;
+  if (screens > 0) accessories.push({ name: "纱窗", count: screens, unit_price: acc.screen_sash, total: screens * acc.screen_sash });
+  if (doors > 0) accessories.push({ name: "纱门", count: doors, unit_price: acc.screen_door, total: doors * acc.screen_door });
+  if (lock) accessories.push({ name: "密码锁", count: 1, unit_price: acc.smart_lock, total: acc.smart_lock });
+
+  return {
+    area_sqm: Math.round(areaSqm * 10000) / 10000,
+    unit_price: pricing.area_price,
+    sash_unit_price: pricing.sash_price,
+    sash_name: pricing.sash_name,
+    opening_sashes: w.opening_sashes || 0,
+    area_total: Math.round(areaTotal * 100) / 100,
+    sash_total: Math.round(sashTotal * 100) / 100,
+    thickening_items: thickeningItems,
+    thickening_total: Math.round(thickeningTotal * 100) / 100,
+    accessories,
+    grand_total: Math.round((areaTotal + sashTotal + thickeningTotal + accessories.reduce((s,a) => s + a.total, 0)) * 100) / 100
+  };
+}
+
+function generateQuotation(results) {
+  const lines = [];
+  lines.push("=".repeat(90));
+  lines.push("  门窗销售明细表 (AI自动生成)");
+  lines.push("=".repeat(90));
+  lines.push("编号  安装位置        型材系列                颜色    玻璃规格            单价   宽度   高度   面积    合计    备注");
+  lines.push("-".repeat(90));
+
+  let lineNo = 0, grandTotal = 0;
+  const sashGroups = {}, thickGroups = {}, accGroups = {};
+
+  for (const item of results) {
+    if (item.skip || item.error) continue;
+    const d = item.data, p = item.price;
+    if (p.error) continue;
+    lineNo++;
+    let prof = (d.profile || '?').replace('侧压','测压');
+    let wid = PRICING.fixes[d.window_id] || d.window_id || '?';
+    grandTotal += p.area_total;
+    lines.push(`${String(lineNo).padEnd(5)} ${pad(wid,14)} ${pad(prof,24)} ${pad(PRICING.default_color,8)} ${pad(d.glass||'?',20)} ${String(p.unit_price).padEnd(5)} ${String(d.width).padEnd(5)} ${String(d.height).padEnd(5)} ${p.area_sqm.toFixed(2).padStart(7)} ${p.area_total.toFixed(2).padStart(8)}`);
+
+    if (p.opening_sashes > 0 && p.sash_unit_price > 0) {
+      let pk = d.profile || '';
+      let name = p.sash_name;
+      if (!name) {
+        if (pk.includes('内开内倒')||pk.includes('S97')||pk.includes('s97')) name = 'S97系列内开内倒 开启页';
+        else if (pk.includes('外开窗')||pk.includes('110E')) name = '中铝110E系列外开窗 开启页';
+        else if (pk.includes('测压')||pk.includes('侧压')) name = '120系列测压门 开启页';
+        else name = pk + ' 开启页';
+      }
+      if (!sashGroups[name]) sashGroups[name] = { price: p.sash_unit_price, count: 0 };
+      sashGroups[name].count += p.opening_sashes;
+    }
+    for (const t of (p.thickening_items || [])) {
+      if (!thickGroups[t.spec]) thickGroups[t.spec] = { area: 0, price: t.unit_price, total: 0 };
+      thickGroups[t.spec].area += t.area;
+      thickGroups[t.spec].total += t.total;
+    }
+    for (const a of (p.accessories || [])) {
+      if (!accGroups[a.name]) accGroups[a.name] = { count: 0, price: a.unit_price, total: 0 };
+      accGroups[a.name].count += a.count;
+      accGroups[a.name].total += a.total;
+    }
+  }
+
+  for (const name of Object.keys(sashGroups).sort()) {
+    const info = sashGroups[name];
+    const subtotal = info.count * info.price;
+    grandTotal += subtotal;
+    lineNo++;
+    lines.push(`${String(lineNo).padEnd(5)} ${pad(name,14)} ${''.padEnd(24)} ${''.padEnd(8)} ${''.padEnd(20)} ${String(info.price).padEnd(5)} ${''.padEnd(5)} ${''.padEnd(5)} ${String(info.count).padStart(7)} ${String(subtotal).padStart(8)}`);
+  }
+  for (const spec of Object.keys(thickGroups).sort()) {
+    const info = thickGroups[spec];
+    grandTotal += info.total;
+    lineNo++;
+    lines.push(`${String(lineNo).padEnd(5)} ${pad('玻璃加厚至'+spec,14)} ${''.padEnd(24)} ${''.padEnd(8)} ${''.padEnd(20)} ${String(info.price).padEnd(5)} ${''.padEnd(5)} ${''.padEnd(5)} ${info.area.toFixed(2).padStart(7)} ${info.total.toFixed(2).padStart(8)}`);
+  }
+  for (const name of Object.keys(accGroups).sort()) {
+    const info = accGroups[name];
+    grandTotal += info.total;
+    lineNo++;
+    lines.push(`${String(lineNo).padEnd(5)} ${pad(name,14)} ${''.padEnd(24)} ${''.padEnd(8)} ${''.padEnd(20)} ${String(info.price).padEnd(5)} ${''.padEnd(5)} ${''.padEnd(5)} ${String(info.count).padStart(7)} ${String(info.total).padStart(8)}`);
+  }
+  lines.push("-".repeat(90));
+  lines.push(`       总计                                                                                           ${grandTotal.toFixed(2)}`);
+  return lines.join('\n');
+}
+
+function pad(s, len) {
+  const str = String(s);
+  // Handle CJK characters (roughly 2 char width)
+  let w = 0;
+  for (const c of str) w += /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/.test(c) ? 2 : 1;
+  return str + ' '.repeat(Math.max(0, len - w));
+}
+
+// ====== API Key ======
+function getApiKey() { return localStorage.getItem('zhipu_key') || ''; }
+
+function toggleSettings() {
+  const modal = document.getElementById('settingsModal');
+  const show = modal.style.display === 'none';
+  modal.style.display = show ? 'flex' : 'none';
+  if (show) {
+    document.getElementById('apiKeyInput').value = getApiKey();
+  }
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (key) {
+    localStorage.setItem('zhipu_key', key);
+  } else {
+    localStorage.removeItem('zhipu_key');
+  }
+  toggleSettings();
+  addMsg('bot', key ? 'API Key 已保存 ✓' : 'API Key 已清除');
+}
+
+// ====== UI ======
+function addMsg(type, text) {
+  const container = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg msg-${type}`;
+  div.innerHTML = text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function addLoadingMsg(text) {
+  const container = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg msg-info';
+  div.innerHTML = `<span class="spinner"></span>${text}`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function addQuotation(text) {
+  const container = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg msg-success';
+  div.innerHTML = `<div class="quotation">
+    <div class="quotation-header">
+      <span>📋 报价单</span>
+      <button class="copy-btn" onclick="copyQuotation(this)">复制</button>
+    </div>
+    <div class="quotation-content">${text.replace(/\n/g,'<br>').replace(/ /g,'&nbsp;')}</div>
+  </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function copyQuotation(btn) {
+  const text = btn.closest('.quotation').querySelector('.quotation-content').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '已复制!';
+    setTimeout(() => btn.textContent = '复制', 2000);
+  });
+}
+
+// ====== PDF Processing ======
+async function handleFile(file) {
+  if (!file) return;
+
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    addMsg('error', '⚠️ 请先设置 API Key：点击右上角齿轮图标 ⚙ → 输入智谱 API Key');
+    toggleSettings();
+    return;
+  }
+
+  addMsg('user', `📄 ${file.name}<br><span style="font-size:12px;opacity:.7">上传成功，开始处理...</span>`);
+
+  const arrayBuf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+  const totalPages = pdf.numPages;
+
+  const loadMsg = addLoadingMsg(`正在解析 PDF（共 ${totalPages} 页）...`);
+
+  const results = [];
+  for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+    loadMsg.innerHTML = `<span class="spinner"></span>正在处理第 ${pageNum}/${totalPages} 页...`;
+
+    const page = await pdf.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 2.0 });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+
+    try {
+      const resp = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'glm-4v',
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'text', text: '你是资深门窗造价工程师。提取这张门窗图纸的数据，输出紧凑JSON。{"window_id":"窗号","width":总宽度mm,"height":总高度mm,"profile":"型材系列","glass":"玻璃规格","opening_sashes":开启扇数,"fixed_sashes":固定扇数,"thickening":[{"area":面积,"spec":"Xmm+Xmm"}],"screen_sashes":纱窗数量,"screen_doors":纱门数量,"smart_lock":有无密码锁}\n严格规则：\n1. 窗号：在图纸右下角标题栏/图注中找，格式如"C3一楼卫生间"。不要用A1、F1等扇编号\n2. 宽度：水平方向最外侧尺寸标注，取整数\n3. 高度：垂直方向最外侧尺寸标注，取整数。取所有高度数字中最大的那个（总高度）\n4. 玻璃加厚：找"X.X㎡加厚至Y"，面积只写数字不带单位，规格如"12mm+12mm"\n5. 纱窗/纱门/密码锁：有则填数量，无则填0\n只输出JSON，不要代码块，不要解释。' },
+              { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } }
+            ]
+          }],
+          max_tokens: 1024,
+          temperature: 0.1
+        })
+      });
+
+      const data = await resp.json();
+      const content = data.choices?.[0]?.message?.content || '';
+
+      // Parse JSON from response
+      let parsed;
+      try {
+        // Try direct parse
+        parsed = JSON.parse(content);
+      } catch {
+        // Try to extract JSON from markdown code blocks
+        const jsonMatch = content.match(/```(?:json)?\s*\n?([\s\S]*?)```/) || content.match(/(\{[\s\S]*\})/);
+        if (jsonMatch) {
+          try { parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]); } catch { parsed = null; }
+        }
+      }
+
+      if (parsed && parsed.window_id) {
+        // Normalize thickening
+        if (!Array.isArray(parsed.thickening)) parsed.thickening = [];
+
+        const price = calculate(parsed);
+        results.push({ page: pageNum, data: parsed, price });
+
+        const statusIcon = price.error ? '⚠️' : '✅';
+        const priceInfo = price.error ? price.error : `${price.area_sqm}㎡ × ${price.unit_price} = ¥${price.area_total}`;
+        addMsg('info', `${statusIcon} <b>第${pageNum}页: ${parsed.window_id}</b><br>${parsed.profile || '?'} ${parsed.width}×${parsed.height}<br>💰 ${priceInfo}`);
+      } else {
+        addMsg('error', `❌ 第${pageNum}页识别失败：AI返回格式不正确`);
+        results.push({ page: pageNum, error: 'parse_failed', raw: content.substring(0, 200) });
+      }
+    } catch (e) {
+      addMsg('error', `❌ 第${pageNum}页处理出错：${e.message}`);
+    }
+
+    // Small delay between pages to avoid rate limiting
+    await new Promise(r => setTimeout(r, 500));
+  }
+
+  loadMsg.remove();
+
+  // Generate quotation
+  const validResults = results.filter(r => r.data && r.price && !r.price.error);
+  if (validResults.length > 0) {
+    const quotation = generateQuotation(validResults);
+    addQuotation(quotation);
+
+    const totalWindows = validResults.length;
+    const totalAmount = validResults.reduce((s, r) => s + r.price.grand_total, 0);
+    addMsg('bot', `✅ <b>处理完成！</b><br>共识别 <b>${totalWindows}</b> 扇门窗<br>总价：<b>¥${totalAmount.toFixed(2)}</b>`);
+  } else {
+    addMsg('error', '未能识别任何门窗数据，请检查 PDF 图纸是否为门窗立面图。');
+  }
+
+  // Reset file input
+  document.getElementById('fileInput').value = '';
+}
+
+// ====== Drag & Drop ======
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') handleFile(file);
+  else addMsg('error', '请上传 PDF 文件');
+});
+
+// ====== Init ======
+window.onload = () => {
+  document.getElementById('apiKeyInput').value = getApiKey();
+};
+</script>
+</body>
+</html>

@@ -121,7 +121,7 @@ def generate_quotation(results: list[dict]) -> str:
     cfg = _load_config()
     lines = []
     lines.append("=" * 110)
-    lines.append("  浏阳尚学府 门窗销售明细表 (AI自动生成)")
+    lines.append("  门窗销售明细表 (AI自动生成)")
     lines.append("=" * 110)
     hdr = f"{'编号':<5} {'安装位置':<14} {'型材系列':<24} {'颜色':<8} {'玻璃规格':<20} {'单价':<6} {'宽':<6} {'高':<6} {'面积':<7} {'合计':<8} {'备注':<6}"
     lines.append(hdr)

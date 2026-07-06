@@ -529,12 +529,13 @@ async def _feishu_reply(message_id: str, text: str):
     )
 if __name__ == "__main__":
     has_feishu = APP_ID and APP_ID != "你的APP_ID"
+    port = int(os.getenv("PORT", "8080"))
     print(f"""
 ╔══════════════════════════════════════════╗
 ║        门窗报价助手 v1.0                ║
 ╠══════════════════════════════════════════╣
-║  浏览器: http://localhost:8080          ║
+║  地址:   http://0.0.0.0:{port:<5}        ║
 ║  飞书:   {'已启用' if has_feishu else '未配置（纯浏览器模式）'}  ║
 ╚══════════════════════════════════════════╝
 """)
-    uvicorn.run(app, host="0.0.0.0", port=8080, log_level="warning")
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")

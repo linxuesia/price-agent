@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: price-agent
+    runtime: python
+    buildCommand: pip install fastapi uvicorn httpx pypdfium2 pillow python-multipart
+    startCommand: python app.py
+    envVars:
+      - key: ZHIPU_API_KEY
+        sync: false
+      - key: PORT
+        value: "8080"
