@@ -12,6 +12,12 @@
   <img src="https://img.shields.io/badge/license-MIT-brightgreen" alt="license"/>
 </p>
 
+<p align="center">
+  <a href="https://linxuesia.github.io/price-agent/">
+    <img src="https://img.shields.io/badge/demo-在线演示-blue?style=for-the-badge" alt="在线演示"/>
+  </a>
+</p>
+
 ---
 
 ## 项目简介
@@ -33,19 +39,21 @@
 
 ```
 ┌──────────────────────────────────┐
-│  📄 浏阳尚学府6.10号修改.pdf     │
-│  共 14 页                         │
+│  📄 sample.pdf (示例图纸)         │
+│  共 2 页                          │
 ├──────────────────────────────────┤
-│  ✅ 第 1 页: C1-楼重型门          │
-│     天域200全景平移门 4020×2550  │
+│  ✅ 第 1 页: C1 - Living Room     │
+│     Panoramic Sliding Door 4020×2550│
 │     💰 面积 10.25㎡ × 980 = ¥10046│
-│  ✅ 第 2 页: C2-楼中厨            │
-│     安能推拉窗 1940×1790         │
-│     💰 面积 3.47㎡ × 599 = ¥2080 │
+│  ✅ 第 2 页: C3 - Master Bedroom  │
+│     S97 Inward Tilt-Turn 3480×2335│
+│     💰 面积 8.13㎡ × 799 = ¥6493 │
 │  ...                              │
-│  📊 汇总: 14扇门窗 / 总价 ¥58,236 │
+│  📊 汇总: 4扇门窗 / 总价 ¥23,580  │
 └──────────────────────────────────┘
 ```
+
+> 仓库包含脱敏示例图纸 [sample.pdf](./sample.pdf)，可直接用于测试。
 
 ---
 

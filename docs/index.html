@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>门窗报价助手 - AI 驱动的门窗报价自动化工具</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --radius: 12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: var(--text);
+  line-height: 1.6;
+}
+.hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+  color: #fff;
+}
+.hero h1 { font-size: 36px; margin-bottom: 8px; }
+.hero p { font-size: 18px; opacity: .9; }
+
+.container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.card h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #667eea;
+  display: inline-block;
+}
+
+.flow { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.flow-step {
+  background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 10px;
+  padding: 14px 18px; text-align: center; font-size: 14px;
+}
+.flow-arrow { font-size: 20px; color: #667eea; }
+
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; margin: 2px; }
+.badge-blue { background: #dbeafe; color: #1e40af; }
+.badge-green { background: #d1fae5; color: #065f46; }
+.badge-red { background: #fee2e2; color: #991b1b; }
+
+code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+pre { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; margin: 10px 0; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+th { background: #f8fafc; font-weight: 600; }
+
+.btn {
+  display: inline-block; padding: 10px 24px; border-radius: 8px;
+  text-decoration: none; font-weight: 500; font-size: 14px; transition: all .2s;
+}
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-outline { border: 1px solid #2563eb; color: #2563eb; }
+.btn-outline:hover { background: #eef2ff; }
+
+.footer { text-align: center; padding: 30px; color: rgba(255,255,255,.7); font-size: 13px; }
+.footer a { color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🚪 门窗报价助手</h1>
+  <p>上传 PDF 图纸 → AI 识别门窗 → 自动生成报价单</p>
+  <p style="margin-top:12px">
+    <a href="https://github.com/linxuesia/price-agent" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.5)">GitHub 仓库</a>
+    <a href="#quickstart" class="btn btn-primary" style="background:#fff;color:#667eea">快速开始</a>
+  </p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>工作流程</h2>
+    <div class="flow">
+      <div class="flow-step">📄<br>上传 PDF 图纸</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🖼️<br>渲染为高清图片</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🤖<br>AI 识别门窗信息</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">💰<br>自动计算报价</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">📥<br>下载报价单</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>核心能力</h2>
+    <p style="margin:12px 0">
+      <span class="badge badge-blue">AI 视觉识别</span>
+      <span class="badge badge-green">自动报价计算</span>
+      <span class="badge badge-red">PDF 解析</span>
+      <span class="badge badge-blue">实时进度展示</span>
+      <span class="badge badge-green">飞书 Bot 集成</span>
+      <span class="badge badge-red">一键部署</span>
+    </p>
+    <ul style="padding-left:20px;margin-top:12px">
+      <li>调用<strong>智谱 GLM-4V</strong>多模态大模型，精准识别门窗尺寸、型材、玻璃规格</li>
+      <li>自动计算面积、开启扇、玻璃加厚、纱窗、密码锁等费用</li>
+      <li>美观的聊天式界面，SSE 实时推送识别进度</li>
+      <li>支持 macOS / Windows 一键安装部署</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>报价逻辑</h2>
+    <p><strong>总价 = 面积价格 + 开启扇价格 + 玻璃加厚价格 + 配件价格</strong></p>
+    <table>
+      <tr><th>型材系列</th><th>面积单价</th><th>开启扇单价</th></tr>
+      <tr><td>全景平移门 / 天域200</td><td>980 元/㎡</td><td>1680 元</td></tr>
+      <tr><td>安能推拉窗</td><td>599 元/㎡</td><td>-</td></tr>
+      <tr><td>中铝110E 外开窗</td><td>580 元/㎡</td><td>580 元</td></tr>
+      <tr><td>S97 内开内倒</td><td>799 元/㎡</td><td>899 元</td></tr>
+      <tr><td>120系列测压门</td><td>880 元/㎡</td><td>880 元</td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--text-secondary)">所有价格均可在网页「定价配置」面板中实时修改。</p>
+  </div>
+
+  <div class="card" id="quickstart">
+    <h2>快速开始</h2>
+    <p>环境要求: Python 3.8+ | 网络连接（访问智谱 AI API）</p>
+    <pre>
+git clone https://github.com/linxuesia/price-agent.git
+cd price-agent
+pip install -r requirements.txt
+cp .env.example .env          # 编辑 .env 填入 API Key
+python app.py                  # 浏览器打开 http://localhost:8080</pre>
+    <p>仓库包含<a href="https://github.com/linxuesia/price-agent/blob/master/sample.pdf">脱敏示例图纸 sample.pdf</a>，上传即可测试。</p>
+  </div>
+
+  <div class="card">
+    <h2>技术栈</h2>
+    <table>
+      <tr><th>层级</th><th>技术</th></tr>
+      <tr><td>后端框架</td><td>FastAPI + uvicorn (异步 HTTP)</td></tr>
+      <tr><td>PDF 处理</td><td>pypdfium2 + Pillow</td></tr>
+      <tr><td>AI 识别</td><td>智谱 GLM-4V 多模态大模型</td></tr>
+      <tr><td>前端 UI</td><td>原生 HTML5/CSS3/JS, SSE 实时通信</td></tr>
+      <tr><td>部署</td><td>跨平台一键安装脚本 (setup.sh / setup.bat)</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p><a href="https://github.com/linxuesia/price-agent">GitHub</a> · MIT License</p>
+</div>
+
+</body>
+</html>

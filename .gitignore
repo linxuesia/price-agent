@@ -28,5 +28,6 @@ Thumbs.db
 *.pdf
 *.jpg
 *.png
+!sample.pdf
 results*.json
 pages/
