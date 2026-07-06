@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>门窗报价助手</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --success: #10b981;
+  --radius: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  gap: 16px;
+}
+
+.app {
+  width: 100%;
+  max-width: 520px;
+  height: 92vh;
+  max-height: 900px;
+  background: var(--surface);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15), 0 8px 20px rgba(0,0,0,.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 定价配置卡片 */
+.pricing-panel {
+  width: 400px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15), 0 8px 20px rgba(0,0,0,.1);
+  transition: all .3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 92vh;
+}
+
+.pricing-panel.collapsed {
+  width: 50px;
+  cursor: pointer;
+}
+
+.pricing-panel .panel-header {
+  padding: 18px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.pricing-panel.collapsed .panel-header {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  justify-content: center;
+  padding: 20px 12px;
+  gap: 10px;
+  border-bottom: none;
+  flex: 1;
+  font-size: 15px;
+}
+
+.pricing-panel.collapsed .panel-header span {
+  display: none;
+}
+
+.pricing-panel .panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.pricing-panel.collapsed .panel-body {
+  display: none;
+}
+
+.pricing-panel .tab-row {
+  display: flex;
+  gap: 0;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.pricing-panel .tab-row button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all .2s;
+}
+
+.pricing-panel .tab-row button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.pricing-panel .field {
+  margin-bottom: 12px;
+}
+
+.pricing-panel .field label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.pricing-panel .field input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.pricing-panel .field input:focus {
+  border-color: var(--primary);
+}
+
+.pricing-panel .row-item {
+  margin-bottom: 8px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+  position: relative;
+}
+
+.pricing-panel .row-item input {
+  width: 100%;
+  padding: 7px 9px;
+  font-size: 13px;
+  margin-bottom: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-family: inherit;
+  outline: none;
+}
+
+.pricing-panel .row-item input:focus {
+  border-color: var(--primary);
+}
+
+.pricing-panel .row-item .row-flex {
+  display: flex;
+  gap: 6px;
+}
+
+.pricing-panel .row-item .row-flex input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.pricing-panel .del-btn {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  font-size: 16px;
+  color: var(--danger);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.pricing-panel .add-row-btn {
+  font-size: 13px;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.pricing-panel .thick-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.pricing-panel .thick-option .spec-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 90px;
+}
+
+.pricing-panel .thick-option input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.pricing-panel .thick-option input:focus {
+  border-color: var(--primary);
+}
+
+.pricing-panel .save-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--success);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.pricing-panel .save-btn:hover {
+  background: #059669;
+}
+
+.pricing-panel .toast-msg {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  font-size: 13px;
+  color: #059669;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.header {
+  background: var(--surface);
+  padding: 16px 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.header .logo {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.header h1 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.header p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #fafbfc;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 滚动条 */
+.chat::-webkit-scrollbar { width: 4px; }
+.chat::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+
+/* 欢迎卡片 */
+.welcome {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-secondary);
+}
+
+.welcome .icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: .8;
+}
+
+.welcome h2 {
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.welcome p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* 消息气泡 */
+.msg {
+  display: flex;
+  flex-direction: column;
+  animation: slideIn .3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg.bot {
+  align-items: flex-start;
+}
+
+.msg.user {
+  align-items: flex-end;
+}
+
+.msg .bubble {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: break-word;
+  position: relative;
+}
+
+.msg.bot .bubble {
+  background: #f1f5f9;
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+
+.msg.user .bubble {
+  background: var(--primary);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.msg .time {
+  font-size: 10px;
+  color: #94a3b8;
+  margin: 3px 6px 0;
+}
+
+/* 进度状态 */
+.msg.status {
+  align-items: center;
+}
+
+.msg.status .bubble {
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e2e8f0;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 图片消息 */
+.msg.image {
+  align-items: center;
+  width: 100%;
+}
+
+.msg.image .bubble {
+  background: transparent;
+  padding: 0;
+  max-width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.msg.image .img-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.msg.image .btn-download {
+  padding: 8px 20px;
+  background: var(--success);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.msg.image .btn-download:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.msg.image img {
+  width: 100%;
+  display: block;
+}
+
+/* 错误消息 */
+.msg.error .bubble {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca;
+}
+
+/* 底部操作区 */
+.bottom {
+  background: var(--surface);
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: #fafbfc;
+}
+
+.upload-zone:hover,
+.upload-zone.drag {
+  border-color: var(--primary);
+  background: #eff6ff;
+}
+
+.upload-zone .icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.upload-zone .label {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.upload-zone .hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.upload-zone input {
+  display: none;
+}
+
+/* 文件已选中状态 */
+.file-selected {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f0fdf4;
+  border-radius: var(--radius);
+  border: 1px solid #bbf7d0;
+}
+
+.file-selected .file-icon {
+  font-size: 24px;
+}
+
+.file-selected .info {
+  flex:1;
+  min-width: 0;
+}
+
+.file-selected .name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-selected .size {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37,99,235,.3);
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn.ghost:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+/* 处理中 */
+.processing {
+  display: none;
+  text-align: center;
+  padding: 20px;
+}
+
+.processing .big-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin: 0 auto 12px;
+}
+
+.processing .text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* 重新上传 */
+.reset-area {
+  display: none;
+  text-align: center;
+  padding: 12px;
+}
+
+/* 图片可点击 */
+.msg.image img {
+  cursor: pointer;
+  transition: opacity .2s;
+}
+.msg.image img:hover {
+  opacity: .85;
+}
+
+/* 图片放大遮罩 */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.lightbox.show {
+  display: flex;
+}
+.lightbox img {
+  max-width: 95vw;
+  max-height: 95vh;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.3);
+}
+.lightbox .close {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  color: #fff;
+  font-size: 32px;
+  cursor: pointer;
+  opacity: .7;
+  transition: opacity .2s;
+}
+.lightbox .close:hover { opacity: 1; }
+
+/* 响应式 */
+@media (max-width: 780px) {
+  body { flex-direction: column; padding: 0; gap: 0; }
+  .app { height: 100vh; max-height: none; border-radius: 0; max-width: none; }
+  .pricing-panel { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 头部 -->
+  <div class="header">
+    <div class="logo">🏠</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <h1>门窗报价助手</h1>
+      <span style="cursor:pointer;font-size:18px;opacity:.5;transition:opacity .2s" onclick="toggleSettings()" title="设置 API Key" id="gearIcon">⚙</span>
+    </div>
+    <p>上传图纸 PDF，自动生成报价单</p>
+  </div>
+
+  <!-- 设置面板 -->
+  <div id="settingsPanel" style="display:none;background:#f8fafc;padding:14px 20px;border-bottom:1px solid var(--border);font-size:13px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-weight:600;color:var(--text)">API Key</span>
+      <span style="font-size:11px;color:var(--text-secondary)">（留空使用默认）</span>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <input id="apiKeyInput" type="text" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none" placeholder="输入智谱 API Key">
+      <button class="btn primary" style="flex:0;padding:8px 14px;font-size:12px" onclick="saveKey()">保存</button>
+    </div>
+    <div id="keyStatus" style="font-size:11px;margin-top:6px;color:var(--success);display:none;">✓ 已保存</div>
+  </div>
+
+  <!-- 聊天区 -->
+  <div class="chat" id="chat">
+    <div class="welcome">
+      <div class="icon">📐</div>
+      <h2>欢迎使用</h2>
+      <p>请上传门窗工程图纸 PDF<br>系统将自动识别尺寸、型材、玻璃规格<br>并计算价格生成报价单</p>
+    </div>
+  </div>
+
+  <!-- 底部 -->
+  <div class="bottom">
+    <!-- 上传区域 -->
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <div class="icon">📤</div>
+      <div class="label">点击上传 PDF 图纸</div>
+      <div class="hint">或拖拽文件到此处</div>
+      <input type="file" id="fileInput" accept=".pdf">
+    </div>
+
+    <!-- 文件已选中 -->
+    <div class="file-selected" id="fileSelected">
+      <div class="file-icon">📄</div>
+      <div class="info">
+        <div class="name" id="selFileName"></div>
+        <div class="size" id="selFileSize"></div>
+      </div>
+      <button class="btn ghost" style="flex:0;padding:8px 12px;font-size:12px" onclick="resetFile()">取消</button>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="actions" id="actions">
+      <button class="btn ghost" id="btnReset" style="display:none" onclick="resetAll()">
+        ↻ 重新上传
+      </button>
+      <button class="btn primary" id="btnSend" disabled>
+        开始识别
+      </button>
+    </div>
+
+    <!-- 处理中 -->
+    <div class="processing" id="processing">
+      <div class="big-spinner"></div>
+      <div class="text">正在识别图纸…</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 定价配置卡片 -->
+<div class="pricing-panel collapsed" id="pricingPanel">
+  <div class="panel-header" onclick="togglePricingPanel()">
+    💰 <span>定价配置</span>
+  </div>
+  <div class="panel-body">
+    <div class="tab-row">
+      <button id="tabProfile" class="active" onclick="switchPricingTab('profile')">型材系列</button>
+      <button id="tabThick" onclick="switchPricingTab('thick')">玻璃加厚</button>
+      <button id="tabAcc" onclick="switchPricingTab('acc')">配件</button>
+    </div>
+    <div id="pricingContent"></div>
+    <button class="save-btn" onclick="savePricing()">保存配置</button>
+  </div>
+</div>
+
+<!-- 图片放大遮罩 -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="close">&times;</span>
+  <img id="lightboxImg" src="" alt="报价单">
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const uploadZone = document.getElementById('uploadZone');
+const fileSelected = document.getElementById('fileSelected');
+const fileInput = document.getElementById('fileInput');
+const btnSend = document.getElementById('btnSend');
+const btnReset = document.getElementById('btnReset');
+const processing = document.getElementById('processing');
+const actions = document.getElementById('actions');
+
+let selectedFile = null;
+
+// ====== 定价配置 ======
+let pricingData = null;
+let currentPricingTab = 'profile';
+
+function togglePricingPanel() {
+  const panel = document.getElementById('pricingPanel');
+  panel.classList.toggle('collapsed');
+  if (!panel.classList.contains('collapsed')) {
+    loadPricing();
+  }
+}
+
+async function loadPricing() {
+  try {
+    const resp = await fetch('/api/pricing');
+    pricingData = await resp.json();
+    renderPricingTab();
+  } catch(e) {
+    console.error('加载定价失败', e);
+  }
+}
+
+function switchPricingTab(tab) {
+  collectPricingTab();
+  currentPricingTab = tab;
+  document.getElementById('tabProfile').classList.toggle('active', tab === 'profile');
+  document.getElementById('tabThick').classList.toggle('active', tab === 'thick');
+  document.getElementById('tabAcc').classList.toggle('active', tab === 'acc');
+  renderPricingTab();
+}
+
+function savePricing() {
+  collectPricingTab();
+  fetch('/api/pricing', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(pricingData),
+  }).then(r => r.json()).then(r => {
+    showPricingToast(r.ok ? '✓ 已保存' : '保存失败');
+  }).catch(() => showPricingToast('保存失败'));
+}
+
+function showPricingToast(msg) {
+  const panel = document.getElementById('pricingPanel');
+  const existing = panel.querySelector('.toast-msg');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'toast-msg';
+  el.textContent = msg;
+  panel.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+function collectPricingTab() {
+  if (!pricingData) return;
+  const container = document.getElementById('pricingContent');
+  if (currentPricingTab === 'profile') {
+    pricingData.profile_pricing = [];
+    container.querySelectorAll('.row-item').forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      pricingData.profile_pricing.push({
+        keywords: (inputs[0]?.value || '').split(',').map(s => s.trim()).filter(Boolean),
+        area_price: Number(inputs[1]?.value) || 0,
+        sash_price: Number(inputs[2]?.value) || 0,
+        sash_name: inputs[3]?.value || null,
+      });
+    });
+  } else if (currentPricingTab === 'thick') {
+    pricingData.thickening_pricing = [];
+    container.querySelectorAll('.thick-option input').forEach(input => {
+      const specKey = input.dataset.spec;
+      const price = Number(input.value) || 0;
+      // 生成 spec 别名: "6mm+6mm" → ["6mm+6mm", "6+6"]
+      const clean = specKey.replace(/mm/g, '').replace(/\s/g, '');
+      pricingData.thickening_pricing.push({
+        spec: [specKey, clean],
+        price: price,
+      });
+    });
+  } else if (currentPricingTab === 'acc') {
+    pricingData.accessory_pricing = pricingData.accessory_pricing || {};
+    pricingData.accessory_pricing.screen_sash = Number(document.getElementById('acc_sash')?.value) || 0;
+    pricingData.accessory_pricing.screen_door = Number(document.getElementById('acc_door')?.value) || 0;
+    pricingData.accessory_pricing.smart_lock = Number(document.getElementById('acc_lock')?.value) || 0;
+    pricingData.default_color = document.getElementById('acc_color')?.value || '物业色';
+  }
+}
+
+function renderPricingTab() {
+  if (!pricingData) return;
+  const container = document.getElementById('pricingContent');
+  let html = '';
+
+  if (currentPricingTab === 'profile') {
+    html = '<div style="max-height:500px;overflow-y:auto">';
+    (pricingData.profile_pricing || []).forEach(item => {
+      html += `<div class="row-item">
+        <button class="del-btn" onclick="this.parentElement.remove()">×</button>
+        <input value="${escHtml(item.keywords.join(', '))}" placeholder="关键词，多个用逗号分隔">
+        <div class="row-flex">
+          <input type="number" value="${item.area_price}" placeholder="面积单价 (元/㎡)">
+          <input type="number" value="${item.sash_price}" placeholder="开启扇单价 (元)">
+        </div>
+        <input value="${escHtml(item.sash_name || '')}" placeholder="开启扇名称（可选）">
+      </div>`;
+    });
+    html += '</div><button class="add-row-btn" onclick="addProfileRow()">+ 添加型材系列</button>';
+  } else if (currentPricingTab === 'thick') {
+    html = '<div style="max-height:500px;overflow-y:auto">';
+    const specs = [
+      {label: '6mm + 6mm', key: '6mm+6mm'},
+      {label: '8mm + 8mm', key: '8mm+8mm'},
+      {label: '10mm + 10mm', key: '10mm+10mm'},
+      {label: '12mm + 12mm', key: '12mm+12mm'},
+    ];
+    const thickMap = {};
+    (pricingData.thickening_pricing || []).forEach(item => {
+      // 用第一个 spec 作为 key
+      const k = (item.spec[0] || '').replace(/\s/g, '');
+      thickMap[k] = item.price;
+    });
+    specs.forEach(s => {
+      html += `<div class="thick-option">
+        <span class="spec-label">${s.label}</span>
+        <input type="number" data-spec="${s.key}" value="${thickMap[s.key] || 0}" placeholder="单价 (元/㎡)">
+      </div>`;
+    });
+    html += '</div>';
+  } else if (currentPricingTab === 'acc') {
+    const acc = pricingData.accessory_pricing || {};
+    html = `<div class="field"><label>纱窗单价（元）</label><input id="acc_sash" type="number" value="${acc.screen_sash || 0}"></div>
+      <div class="field"><label>纱门单价（元）</label><input id="acc_door" type="number" value="${acc.screen_door || 0}"></div>
+      <div class="field"><label>密码锁单价（元）</label><input id="acc_lock" type="number" value="${acc.smart_lock || 0}"></div>
+      <div class="field"><label>默认颜色</label><input id="acc_color" value="${escHtml(pricingData.default_color || '物业色')}"></div>`;
+  }
+  container.innerHTML = html;
+}
+
+function addProfileRow() {
+  collectPricingTab();
+  pricingData.profile_pricing.push({keywords: [''], area_price: 0, sash_price: 0, sash_name: ''});
+  renderPricingTab();
+}
+
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ====== 设置面板 ======
+function toggleSettings() {
+  const p = document.getElementById('settingsPanel');
+  p.style.display = p.style.display === 'none' ? '' : 'none';
+}
+
+function saveKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (key) {
+    localStorage.setItem('zhipu_key', key);
+  } else {
+    localStorage.removeItem('zhipu_key');
+  }
+  document.getElementById('keyStatus').style.display = '';
+  setTimeout(() => { document.getElementById('keyStatus').style.display = 'none'; }, 2000);
+}
+
+// 初始化
+(function() {
+  const saved = localStorage.getItem('zhipu_key');
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+  }
+})();
+
+// 文件选择
+fileInput.onchange = () => {
+  if (fileInput.files.length > 0) {
+    selectedFile = fileInput.files[0];
+    showFileSelected();
+  }
+};
+
+// 拖拽支持
+uploadZone.ondragover = (e) => { e.preventDefault(); uploadZone.classList.add('drag'); };
+uploadZone.ondragleave = () => uploadZone.classList.remove('drag');
+uploadZone.ondrop = (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag');
+  if (e.dataTransfer.files.length > 0) {
+    selectedFile = e.dataTransfer.files[0];
+    showFileSelected();
+  }
+};
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function showFileSelected() {
+  document.getElementById('selFileName').textContent = selectedFile.name;
+  document.getElementById('selFileSize').textContent = formatSize(selectedFile.size);
+  uploadZone.style.display = 'none';
+  fileSelected.style.display = 'flex';
+  btnSend.disabled = false;
+}
+
+function resetFile() {
+  selectedFile = null;
+  fileInput.value = '';
+  uploadZone.style.display = '';
+  fileSelected.style.display = 'none';
+  btnSend.disabled = true;
+}
+
+function resetAll() {
+  resetFile();
+  btnReset.style.display = 'none';
+  processing.style.display = 'none';
+  uploadZone.style.display = '';
+  actions.style.display = 'flex';
+}
+
+function addBubble(text, type) {
+  // 清除欢迎语
+  const welcome = chat.querySelector('.welcome');
+  if (welcome) welcome.remove();
+
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+
+  const time = document.createElement('div');
+  time.className = 'time';
+  time.textContent = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+
+  div.appendChild(bubble);
+  div.appendChild(time);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addStatus(text) {
+  const div = document.createElement('div');
+  div.className = 'msg status';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  const spinner = document.createElement('div');
+  spinner.className = 'spinner';
+  bubble.appendChild(spinner);
+  bubble.appendChild(document.createTextNode(text));
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function addImage(src) {
+  const div = document.createElement('div');
+  div.className = 'msg image';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  const img = document.createElement('img');
+  img.src = src;
+  img.onclick = () => openLightbox(src);
+  img.title = '点击查看大图';
+  bubble.appendChild(img);
+
+  // 下载按钮 - 放在 bubble 内部图片下方
+  const actions = document.createElement('div');
+  actions.style.cssText = 'padding:10px 14px;text-align:center;background:#fff;border-top:1px solid #e2e8f0';
+  const btn = document.createElement('button');
+  btn.style.cssText = 'padding:10px 28px;background:#10b981;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer';
+  btn.textContent = '下载报价单';
+  btn.onclick = (e) => { e.stopPropagation(); downloadImage(src); };
+  btn.onmouseenter = () => { btn.style.background = '#059669'; };
+  btn.onmouseleave = () => { btn.style.background = '#10b981'; };
+  actions.appendChild(btn);
+  bubble.appendChild(actions);
+
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+
+  // 自动下载
+  downloadImage(src);
+}
+
+function downloadImage(src) {
+  const a = document.createElement('a');
+  a.href = src;
+  a.download = '门窗报价单_' + new Date().toISOString().slice(0,10) + '.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('show');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('show');
+}
+
+function addError(text) {
+  const div = document.createElement('div');
+  div.className = 'msg error';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = '❌ ' + text;
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// 开始处理
+btnSend.onclick = async () => {
+  if (!selectedFile) return;
+
+  // 切换到处理状态
+  uploadZone.style.display = 'none';
+  fileSelected.style.display = 'none';
+  btnSend.style.display = 'none';
+  processing.style.display = 'block';
+  btnReset.style.display = 'none';
+
+  addBubble(selectedFile.name, 'user');
+
+  const form = new FormData();
+  form.append('file', selectedFile);
+
+  // 传入自定义 Key
+  const customKey = localStorage.getItem('zhipu_key') || '';
+  const headers = {};
+  if (customKey) headers['X-Zhipu-Key'] = customKey;
+
+  try {
+    const resp = await fetch('/api/upload', { method: 'POST', body: form, headers });
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let statusEl = null;
+    let imageReceived = false;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ') || line === 'data: [DONE]') continue;
+        try {
+          const data = JSON.parse(line.slice(6));
+          if (data.type === 'status') {
+            if (imageReceived) {
+              addBubble(data.text, 'bot');
+            } else {
+              if (statusEl) statusEl.remove();
+              statusEl = addStatus(data.text);
+            }
+          } else if (data.type === 'image') {
+            if (statusEl) { statusEl.remove(); statusEl = null; }
+            imageReceived = true;
+            processing.style.display = 'none';
+            addImage(data.src);
+          } else if (data.type === 'error') {
+            if (statusEl) { statusEl.remove(); statusEl = null; }
+            processing.style.display = 'none';
+            addError(data.text);
+          }
+        } catch(e) {}
+      }
+    }
+
+    // 清理残留 spinner
+    if (statusEl) { statusEl.remove(); statusEl = null; }
+
+  } catch(e) {
+    processing.style.display = 'none';
+    addError('网络错误：' + e.message);
+  }
+
+  // 恢复操作区
+  processing.style.display = 'none';
+  actions.style.display = 'flex';
+  btnSend.style.display = '';
+  btnSend.disabled = true;
+  btnReset.style.display = 'block';
+  selectedFile = null;
+  fileInput.value = '';
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "profile_pricing": [
+    {"keywords": ["全景平移门", "全景平开门", "天域200"], "area_price": 980, "sash_price": 1680, "sash_name": "全景平移门 开启页"},
+    {"keywords": ["安能推拉窗", "推拉窗"], "area_price": 599, "sash_price": 0, "sash_name": null},
+    {"keywords": ["中铝110E", "外开窗"], "area_price": 580, "sash_price": 580, "sash_name": "中铝110E系列外开窗 开启页"},
+    {"keywords": ["19分贝", "内开内倒", "内开系列", "S97", "s97"], "area_price": 799, "sash_price": 899, "sash_name": "S97系列内开内倒 开启页"},
+    {"keywords": ["测压门", "侧压门", "120系列"], "area_price": 880, "sash_price": 880, "sash_name": "120系列测压门 开启页"}
+  ],
+  "thickening_pricing": [
+    {"spec": ["6mm+6mm", "6+6"], "price": 128},
+    {"spec": ["8mm+8mm", "8+8"], "price": 428},
+    {"spec": ["10mm+10mm", "10+10"], "price": 628},
+    {"spec": ["12mm+12mm", "12+12"], "price": 780}
+  ],
+  "accessory_pricing": {
+    "screen_sash": 500,
+    "screen_door": 480,
+    "smart_lock": 1580
+  },
+  "default_color": "物业色",
+  "window_id_fixes": {
+    "C1-楼重型门": "C1一楼重型门",
+    "C2-楼中厨": "C2一楼中厨",
+    "C3-楼卫生间": "C3一楼卫生间",
+    "C3-1": "C3一楼卫生间",
+    "C3": "C3一楼卫生间",
+    "A1": "C9三楼起居室"
+  }
+}

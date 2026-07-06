@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>定价配置</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --success: #10b981;
+  --danger: #ef4444;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  background: #f0f2f5;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.header a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: all .2s;
+}
+
+.header a:hover {
+  background: #f8fafc;
+  color: var(--text);
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.card .desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+td input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s;
+}
+
+td input:focus {
+  border-color: var(--primary);
+}
+
+td input.narrow {
+  width: 80px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn.danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+}
+
+.btn.danger:hover {
+  background: #fef2f2;
+}
+
+.btn.sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.add-row {
+  margin-top: 10px;
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #059669;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <a href="/">← 返回</a>
+    <h1>定价配置</h1>
+  </div>
+
+  <!-- 型材定价 -->
+  <div class="card">
+    <h2>型材定价</h2>
+    <p class="desc">关键词用于匹配 AI 识别结果中的型材名称，多个关键词用逗号分隔</p>
+    <table>
+      <thead>
+        <tr>
+          <th>关键词</th>
+          <th>面积单价 (元/㎡)</th>
+          <th>开启扇单价 (元/页)</th>
+          <th>开启扇名称</th>
+          <th style="width:40px"></th>
+        </tr>
+      </thead>
+      <tbody id="profileBody"></tbody>
+    </table>
+    <div class="add-row">
+      <button class="btn sm primary" onclick="addProfile()">+ 添加行</button>
+    </div>
+  </div>
+
+  <!-- 玻璃加厚定价 -->
+  <div class="card">
+    <h2>玻璃加厚定价</h2>
+    <p class="desc">规格匹配 AI 识别结果中的加厚描述，如 "12mm+12mm"</p>
+    <table>
+      <thead>
+        <tr>
+          <th>规格（逗号分隔多个别名）</th>
+          <th>单价 (元/㎡)</th>
+          <th style="width:40px"></th>
+        </tr>
+      </thead>
+      <tbody id="thickBody"></tbody>
+    </table>
+    <div class="add-row">
+      <button class="btn sm primary" onclick="addThick()">+ 添加行</button>
+    </div>
+  </div>
+
+  <!-- 配件定价 -->
+  <div class="card">
+    <h2>配件定价</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>配件名称</th>
+          <th>单价 (元)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>纱窗</td>
+          <td><input class="narrow" id="acc_screen_sash" type="number"></td>
+        </tr>
+        <tr>
+          <td>纱门</td>
+          <td><input class="narrow" id="acc_screen_door" type="number"></td>
+        </tr>
+        <tr>
+          <td>密码锁</td>
+          <td><input class="narrow" id="acc_smart_lock" type="number"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 其他配置 -->
+  <div class="card">
+    <h2>其他</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>默认颜色</th>
+          <th>window_id 修正（JSON 格式，C1旧名→C1新名）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input style="width:120px" id="cfg_default_color" type="text"></td>
+          <td><input id="cfg_window_id_fixes" type="text" placeholder='{"C1": "C1新名"}'></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 保存 -->
+  <div class="actions">
+    <button class="btn primary" onclick="save()">保存配置</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ====== 加载当前配置 ======
+let config = {};
+
+async function load() {
+  try {
+    const resp = await fetch('/api/pricing');
+    config = await resp.json();
+    renderAll();
+  } catch(e) {
+    showToast('加载配置失败：' + e.message);
+  }
+}
+
+// ====== 渲染 ======
+function renderAll() {
+  renderProfiles();
+  renderThickening();
+  renderAccessories();
+  renderOther();
+}
+
+function renderProfiles() {
+  const tbody = document.getElementById('profileBody');
+  const items = config.profile_pricing || [];
+  tbody.innerHTML = items.map((item, i) => `
+    <tr>
+      <td><input value="${esc(item.keywords.join(', '))}" data-path="profile_pricing.${i}.keywords" data-type="csv"></td>
+      <td><input class="narrow" type="number" value="${item.area_price}" data-path="profile_pricing.${i}.area_price"></td>
+      <td><input class="narrow" type="number" value="${item.sash_price}" data-path="profile_pricing.${i}.sash_price"></td>
+      <td><input value="${esc(item.sash_name || '')}" data-path="profile_pricing.${i}.sash_name"></td>
+      <td><button class="btn danger sm" onclick="removeProfile(${i})">×</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderThickening() {
+  const tbody = document.getElementById('thickBody');
+  const items = config.thickening_pricing || [];
+  tbody.innerHTML = items.map((item, i) => `
+    <tr>
+      <td><input value="${esc(item.spec.join(', '))}" data-path="thickening_pricing.${i}.spec" data-type="csv"></td>
+      <td><input class="narrow" type="number" value="${item.price}" data-path="thickening_pricing.${i}.price"></td>
+      <td><button class="btn danger sm" onclick="removeThick(${i})">×</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderAccessories() {
+  const acc = config.accessory_pricing || {};
+  document.getElementById('acc_screen_sash').value = acc.screen_sash || 0;
+  document.getElementById('acc_screen_door').value = acc.screen_door || 0;
+  document.getElementById('acc_smart_lock').value = acc.smart_lock || 0;
+}
+
+function renderOther() {
+  document.getElementById('cfg_default_color').value = config.default_color || '';
+  document.getElementById('cfg_window_id_fixes').value = config.window_id_fixes ? JSON.stringify(config.window_id_fixes) : '';
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ====== 收集表单数据 ======
+function collect() {
+  // 收集所有 input 数据
+  document.querySelectorAll('input[data-path]').forEach(input => {
+    const path = input.dataset.path;
+    let value = input.value;
+    if (input.dataset.type === 'csv') {
+      value = value.split(',').map(s => s.trim()).filter(Boolean);
+    } else {
+      value = Number(value) || 0;
+    }
+    setByPath(config, path, value);
+  });
+
+  // 配件
+  config.accessory_pricing = config.accessory_pricing || {};
+  config.accessory_pricing.screen_sash = Number(document.getElementById('acc_screen_sash').value) || 0;
+  config.accessory_pricing.screen_door = Number(document.getElementById('acc_screen_door').value) || 0;
+  config.accessory_pricing.smart_lock = Number(document.getElementById('acc_smart_lock').value) || 0;
+
+  // 其他
+  config.default_color = document.getElementById('cfg_default_color').value;
+  try {
+    config.window_id_fixes = JSON.parse(document.getElementById('cfg_window_id_fixes').value || '{}');
+  } catch(e) {
+    config.window_id_fixes = {};
+  }
+}
+
+function setByPath(obj, path, value) {
+  const parts = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const p = parts[i];
+    if (i === parts.length - 2 && !isNaN(parts[i+1])) {
+      // next is array index
+      if (!cur[p]) cur[p] = [];
+    } else {
+      if (!cur[p]) cur[p] = {};
+    }
+    cur = cur[p];
+  }
+  cur[parts[parts.length - 1]] = value;
+}
+
+// ====== 增删行 ======
+function addProfile() {
+  config.profile_pricing = config.profile_pricing || [];
+  config.profile_pricing.push({keywords: [''], area_price: 0, sash_price: 0, sash_name: ''});
+  renderProfiles();
+}
+
+function removeProfile(i) {
+  config.profile_pricing.splice(i, 1);
+  renderProfiles();
+}
+
+function addThick() {
+  config.thickening_pricing = config.thickening_pricing || [];
+  config.thickening_pricing.push({spec: [''], price: 0});
+  renderThickening();
+}
+
+function removeThick(i) {
+  config.thickening_pricing.splice(i, 1);
+  renderThickening();
+}
+
+// ====== 保存 ======
+async function save() {
+  collect();
+  try {
+    const resp = await fetch('/api/pricing', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(config),
+    });
+    const result = await resp.json();
+    if (result.ok) {
+      showToast('保存成功');
+    } else {
+      showToast('保存失败');
+    }
+  } catch(e) {
+    showToast('保存失败：' + e.message);
+  }
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ====== 初始化 ======
+load();
+</script>
+</body>
+</html>
