@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+httpx
+pypdfium2
+pillow
+python-multipart
