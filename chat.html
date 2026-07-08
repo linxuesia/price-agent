@@ -202,14 +202,22 @@ body {
 }
 
 .pricing-panel .add-row-btn {
+  display: block;
+  width: 100%;
+  padding: 8px;
   font-size: 13px;
   color: var(--primary);
-  background: none;
-  border: none;
+  background: #eff6ff;
+  border: 1.5px dashed var(--primary);
+  border-radius: 8px;
   cursor: pointer;
-  padding: 4px 0;
-  margin-bottom: 8px;
   font-weight: 600;
+  text-align: center;
+  transition: all .2s;
+}
+
+.pricing-panel .add-row-btn:hover {
+  background: #dbeafe;
 }
 
 .pricing-panel .thick-option {
@@ -841,14 +849,13 @@ function collectPricingTab() {
   if (!pricingData) return;
   const container = document.getElementById('pricingContent');
   if (currentPricingTab === 'profile') {
+    pricingData.sash_price = Number(document.getElementById('globalSashPrice')?.value) || 0;
     pricingData.profile_pricing = [];
     container.querySelectorAll('.row-item').forEach(row => {
       const inputs = row.querySelectorAll('input');
       pricingData.profile_pricing.push({
-        keywords: (inputs[0]?.value || '').split(',').map(s => s.trim()).filter(Boolean),
+        keyword: (inputs[0]?.value || '').trim(),
         area_price: Number(inputs[1]?.value) || 0,
-        sash_price: Number(inputs[2]?.value) || 0,
-        sash_name: inputs[3]?.value || null,
       });
     });
   } else if (currentPricingTab === 'thick') {
@@ -864,10 +871,19 @@ function collectPricingTab() {
       });
     });
   } else if (currentPricingTab === 'acc') {
-    pricingData.accessory_pricing = pricingData.accessory_pricing || {};
-    pricingData.accessory_pricing.screen_sash = Number(document.getElementById('acc_sash')?.value) || 0;
-    pricingData.accessory_pricing.screen_door = Number(document.getElementById('acc_door')?.value) || 0;
-    pricingData.accessory_pricing.smart_lock = Number(document.getElementById('acc_lock')?.value) || 0;
+    pricingData.accessory_pricing = {};
+    pricingData.custom_accessories = [];
+    container.querySelectorAll('.row-item').forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      const name = inputs[0]?.value || '';
+      const price = Number(inputs[1]?.value) || 0;
+      if (!name) return;
+      // 匹配固定项
+      if (name === '纱窗') pricingData.accessory_pricing.screen_sash = price;
+      else if (name === '纱门') pricingData.accessory_pricing.screen_door = price;
+      else if (name === '密码锁') pricingData.accessory_pricing.smart_lock = price;
+      else pricingData.custom_accessories.push({name, price});
+    });
     pricingData.default_color = document.getElementById('acc_color')?.value || '物业色';
   }
 }
@@ -878,21 +894,24 @@ function renderPricingTab() {
   let html = '';
 
   if (currentPricingTab === 'profile') {
-    html = '<div style="max-height:500px;overflow-y:auto">';
+    html = `<div class="field">
+      <label>全局开启扇单价 (元)</label>
+      <input id="globalSashPrice" type="number" value="${pricingData.sash_price || 0}" placeholder="所有型材统一的开启扇单价">
+    </div>`;
+    html += '<div style="max-height:280px;overflow-y:auto;padding-right:4px">';
     (pricingData.profile_pricing || []).forEach(item => {
+      const kw = Array.isArray(item.keywords) ? item.keywords.join(', ') : (item.keyword || '');
       html += `<div class="row-item">
         <button class="del-btn" onclick="this.parentElement.remove()">×</button>
-        <input value="${escHtml(item.keywords.join(', '))}" placeholder="关键词，多个用逗号分隔">
         <div class="row-flex">
-          <input type="number" value="${item.area_price}" placeholder="面积单价 (元/㎡)">
-          <input type="number" value="${item.sash_price}" placeholder="开启扇单价 (元)">
+          <input value="${escHtml(kw)}" placeholder="关键词（模糊匹配，如: C15）" style="flex:1">
+          <input type="number" value="${item.area_price}" placeholder="单价 (元/㎡)" style="width:120px">
         </div>
-        <input value="${escHtml(item.sash_name || '')}" placeholder="开启扇名称（可选）">
       </div>`;
     });
     html += '</div><button class="add-row-btn" onclick="addProfileRow()">+ 添加型材系列</button>';
   } else if (currentPricingTab === 'thick') {
-    html = '<div style="max-height:500px;overflow-y:auto">';
+    html = '<div style="max-height:340px;overflow-y:auto;padding-right:4px">';
     const specs = [
       {label: '6mm + 6mm', key: '6mm+6mm'},
       {label: '8mm + 8mm', key: '8mm+8mm'},
@@ -914,20 +933,44 @@ function renderPricingTab() {
     html += '</div>';
   } else if (currentPricingTab === 'acc') {
     const acc = pricingData.accessory_pricing || {};
-    html = `<div class="field"><label>纱窗单价（元）</label><input id="acc_sash" type="number" value="${acc.screen_sash || 0}"></div>
-      <div class="field"><label>纱门单价（元）</label><input id="acc_door" type="number" value="${acc.screen_door || 0}"></div>
-      <div class="field"><label>密码锁单价（元）</label><input id="acc_lock" type="number" value="${acc.smart_lock || 0}"></div>
-      <div class="field"><label>默认颜色</label><input id="acc_color" value="${escHtml(pricingData.default_color || '物业色')}"></div>`;
+    html = '<div style="max-height:340px;overflow-y:auto;padding-right:4px">';
+    // 固定项 + 自定义项都用 row-item 格式
+    const items = [
+      {label: '纱窗', key: 'screen_sash', price: acc.screen_sash || 0},
+      {label: '纱门', key: 'screen_door', price: acc.screen_door || 0},
+      {label: '密码锁', key: 'smart_lock', price: acc.smart_lock || 0},
+    ];
+    // 自定义配件存在 pricingData.custom_accessories 中
+    (pricingData.custom_accessories || []).forEach((item, i) => {
+      items.push({label: item.name || '', key: `custom_${i}`, price: item.price || 0});
+    });
+    items.forEach((item, i) => {
+      html += `<div class="row-item">
+        <button class="del-btn" onclick="this.parentElement.remove()">×</button>
+        <div class="row-flex">
+          <input value="${escHtml(item.label)}" placeholder="配件名称" style="flex:1">
+          <input type="number" value="${item.price}" placeholder="单价" style="width:100px">
+        </div>
+      </div>`;
+    });
+    html += '</div><button class="add-row-btn" onclick="addAccessory()">+ 添加配件</button>';
+    html += `<div class="field" style="margin-top:10px"><label>默认颜色</label><input id="acc_color" value="${escHtml(pricingData.default_color || '物业色')}"></div>`;
   }
   container.innerHTML = html;
 }
 
 function addProfileRow() {
   collectPricingTab();
-  pricingData.profile_pricing.push({keywords: [''], area_price: 0, sash_price: 0, sash_name: ''});
+  pricingData.profile_pricing.push({keyword: '', area_price: 0});
   renderPricingTab();
 }
 
+function addAccessory() {
+  collectPricingTab();
+  pricingData.custom_accessories = pricingData.custom_accessories || [];
+  pricingData.custom_accessories.push({name: '', price: 0});
+  renderPricingTab();
+}
 
 function escHtml(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

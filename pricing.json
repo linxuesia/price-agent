@@ -1,11 +1,12 @@
 {
   "profile_pricing": [
-    {"keywords": ["全景平移门", "全景平开门", "天域200"], "area_price": 980, "sash_price": 1680, "sash_name": "全景平移门 开启页"},
-    {"keywords": ["安能推拉窗", "推拉窗"], "area_price": 599, "sash_price": 0, "sash_name": null},
-    {"keywords": ["中铝110E", "外开窗"], "area_price": 580, "sash_price": 580, "sash_name": "中铝110E系列外开窗 开启页"},
-    {"keywords": ["19分贝", "内开内倒", "内开系列", "S97", "s97"], "area_price": 799, "sash_price": 899, "sash_name": "S97系列内开内倒 开启页"},
-    {"keywords": ["测压门", "侧压门", "120系列"], "area_price": 880, "sash_price": 880, "sash_name": "120系列测压门 开启页"}
+    {"keyword": "天域200", "area_price": 980},
+    {"keyword": "安能推拉窗", "area_price": 599},
+    {"keyword": "中铝110E", "area_price": 580},
+    {"keyword": "S97", "area_price": 799},
+    {"keyword": "120系列", "area_price": 880}
   ],
+  "sash_price": 1680,
   "thickening_pricing": [
     {"spec": ["6mm+6mm", "6+6"], "price": 128},
     {"spec": ["8mm+8mm", "8+8"], "price": 428},

@@ -13,20 +13,20 @@ def _load_config():
     if _CFG is not None:
         return _CFG
     cfg_path = os.path.join(os.path.dirname(__file__), "pricing.json")
-    with open(cfg_path, "r") as f:
+    with open(cfg_path, "r", encoding="utf-8") as f:
         _CFG = json.load(f)
     return _CFG
 
 
 def match_profile(profile_str: str):
-    """返回 (面积单价, 开启扇单价, 开启扇名称或None)"""
+    """模糊匹配关键词，返回面积单价，未匹配返回 None"""
     if not profile_str:
         return None
     cfg = _load_config()
     for item in cfg["profile_pricing"]:
-        for kw in item["keywords"]:
-            if kw in profile_str:
-                return (item["area_price"], item["sash_price"], item.get("sash_name"))
+        kw = item["keyword"]
+        if kw and kw in profile_str:
+            return item["area_price"]
     return None
 
 
@@ -69,11 +69,12 @@ def calculate(window_data: dict) -> dict:
             t["area"] = float(area_val)
 
     area_sqm = (w * h) / 1_000_000
-    pricing = match_profile(profile)
-    if pricing is None:
+    area_price = match_profile(profile)
+    if area_price is None:
         return {"area_sqm": round(area_sqm, 4), "error": f"未找到型材「{profile}」的定价"}
 
-    area_price, sash_price, sash_name = pricing
+    cfg = _load_config()
+    sash_price = cfg.get("sash_price", 0)
     area_total = area_sqm * area_price
     sash_total = sashes * sash_price
 
@@ -106,7 +107,6 @@ def calculate(window_data: dict) -> dict:
         "area_sqm": round(area_sqm, 4),
         "unit_price": area_price,
         "sash_unit_price": sash_price,
-        "sash_name": sash_name,
         "opening_sashes": sashes,
         "area_total": round(area_total, 2),
         "sash_total": round(sash_total, 2),
@@ -152,20 +152,9 @@ def generate_quotation(results: list[dict]) -> str:
             f"{p['area_sqm']:<7.2f} {p['area_total']:<8.2f} {'':<6}"
         )
 
-        # 收集开扇（归一化合并同类）
+        # 收集开扇
         if p["opening_sashes"] > 0 and p["sash_unit_price"] > 0:
-            pk = d.get("profile", "")
-            name = p.get("sash_name")
-            if not name:
-                # 回退：根据关键词自行归类
-                if any(k in pk for k in ["内开内倒", "内开系列", "97内开", "S97", "s97"]):
-                    name = "S97系列内开内倒 开启页"
-                elif any(k in pk for k in ["外开窗", "110E"]):
-                    name = "中铝110E系列外开窗 开启页"
-                elif any(k in pk for k in ["测压", "侧压"]):
-                    name = "120系列测压门 开启页"
-                else:
-                    name = pk + " 开启页"
+            name = "开启扇"
             if name not in sash_groups:
                 sash_groups[name] = {"price": p["sash_unit_price"], "count": 0}
             sash_groups[name]["count"] += p["opening_sashes"]

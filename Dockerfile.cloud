@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /code
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 libglib2.0-0 libnss3 libnspr4 libatk-bridge2.0-0 \
+    libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+    libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && playwright install chromium
+
+COPY app.py calc.py pricing.json chat.html pricing.html ./
+
+EXPOSE 80
+CMD ["python", "app.py"]

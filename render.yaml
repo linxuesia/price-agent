@@ -2,10 +2,16 @@ services:
   - type: web
     name: price-agent
     runtime: python
-    buildCommand: pip install fastapi uvicorn httpx pypdfium2 pillow python-multipart
+    buildCommand: pip install fastapi uvicorn httpx pypdfium2 pillow python-multipart playwright && playwright install chromium
     startCommand: python app.py
     envVars:
       - key: ZHIPU_API_KEY
         sync: false
       - key: PORT
         value: "8080"
+      - key: FEISHU_APP_ID
+        sync: false
+      - key: FEISHU_APP_SECRET
+        sync: false
+      - key: FEISHU_VERIFY_TOKEN
+        sync: false
