@@ -13,5 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt && playwright install chromiu
 
 COPY app.py calc.py pricing.json chat.html pricing.html ./
 
+ENV PORT=80
 EXPOSE 80
 CMD ["python", "app.py"]
