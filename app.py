@@ -10,6 +10,7 @@
 
 import asyncio
 import base64
+import hashlib
 import io
 import json
 import os
@@ -23,6 +24,7 @@ from pathlib import Path
 
 import httpx
 import pypdfium2 as pdfium
+from Crypto.Cipher import AES
 from fastapi import FastAPI, Request, Response, UploadFile
 from fastapi.responses import HTMLResponse, StreamingResponse
 import uvicorn
@@ -55,6 +57,7 @@ _load_dotenv()
 APP_ID = os.getenv("FEISHU_APP_ID", "")
 APP_SECRET = os.getenv("FEISHU_APP_SECRET", "")
 VERIFY_TOKEN = os.getenv("FEISHU_VERIFY_TOKEN", "")
+ENCRYPT_KEY = os.getenv("FEISHU_ENCRYPT_KEY", "")
 
 ZHIPU_KEY = os.getenv("ZHIPU_API_KEY", "")
 ZHIPU_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
@@ -416,10 +419,34 @@ async def api_save_pricing(data: dict):
 if APP_ID and APP_ID != "你的APP_ID":
     print(f"[飞书] Bot 已启用")
 
+    def _decrypt_feishu_event(encrypted_body: dict) -> dict:
+        """解密飞书加密事件"""
+        encrypt_str = encrypted_body.get("encrypt", "")
+        if not encrypt_str or not ENCRYPT_KEY:
+            return encrypted_body
+
+        # AES-256-CBC 解密
+        key = hashlib.sha256(ENCRYPT_KEY.encode("utf-8")).digest()
+        ciphertext = base64.b64decode(encrypt_str)
+        iv = ciphertext[:16]
+        cipher = AES.new(key, AES.MODE_CBC, iv=iv)
+        plaintext = cipher.decrypt(ciphertext[16:])
+
+        # 去除 PKCS7 padding
+        pad_len = plaintext[-1]
+        plaintext = plaintext[:-pad_len]
+
+        decrypted = json.loads(plaintext.decode("utf-8"))
+        print(f"[飞书] 解密后事件: {json.dumps(decrypted, ensure_ascii=False)[:300]}")
+        return decrypted
+
     @app.post("/feishu/event")
     async def feishu_event(req: Request):
-        body = await req.json()
-        print(f"\n[飞书] 收到事件: {json.dumps(body, ensure_ascii=False, indent=2)[:500]}")
+        raw_body = await req.json()
+        print(f"\n[飞书] 收到事件: {json.dumps(raw_body, ensure_ascii=False)[:500]}")
+
+        # 如果是加密事件，先解密
+        body = _decrypt_feishu_event(raw_body)
 
         if body.get("type") == "url_verification":
             print("[飞书] URL验证请求，已响应")
