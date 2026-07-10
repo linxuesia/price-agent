@@ -440,6 +440,23 @@ if APP_ID and APP_ID != "你的APP_ID":
         print(f"[飞书] 解密后事件: {json.dumps(decrypted, ensure_ascii=False)[:300]}")
         return decrypted
 
+    def _encrypt_feishu_response(data: dict) -> dict:
+        """加密飞书响应"""
+        if not ENCRYPT_KEY:
+            return data
+
+        plaintext = json.dumps(data).encode("utf-8")
+        # PKCS7 padding
+        pad_len = 16 - (len(plaintext) % 16)
+        plaintext += bytes([pad_len] * pad_len)
+
+        key = hashlib.sha256(ENCRYPT_KEY.encode("utf-8")).digest()
+        iv = os.urandom(16)
+        cipher = AES.new(key, AES.MODE_CBC, iv=iv)
+        ciphertext = iv + cipher.encrypt(plaintext)
+
+        return {"encrypt": base64.b64encode(ciphertext).decode("utf-8")}
+
     @app.post("/feishu/event")
     async def feishu_event(req: Request):
         raw_body = await req.json()
@@ -450,7 +467,9 @@ if APP_ID and APP_ID != "你的APP_ID":
 
         if body.get("type") == "url_verification":
             print("[飞书] URL验证请求，已响应")
-            return Response(json.dumps({"challenge": body["challenge"]}), media_type="application/json")
+            resp = {"challenge": body["challenge"]}
+            resp = _encrypt_feishu_response(resp)
+            return Response(json.dumps(resp), media_type="application/json")
 
         header = body.get("header", {})
         event = body.get("event", {})
