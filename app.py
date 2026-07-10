@@ -480,83 +480,83 @@ if APP_ID and APP_ID != "你的APP_ID":
             event = body.get("event", {})
             event_type = header.get("event_type", "")
 
-        print(f"[飞书] event_type={event_type}")
+            print(f"[飞书] event_type={event_type}")
 
-        if event_type == "im.message.receive_v1":
-            msg = event.get("message", {})
-            msg_type = msg.get("message_type", "")
-            message_id = msg.get("message_id", "")
-            print(f"[飞书] msg_type={msg_type}, message_id={message_id}")
+            if event_type == "im.message.receive_v1":
+                msg = event.get("message", {})
+                msg_type = msg.get("message_type", "")
+                message_id = msg.get("message_id", "")
+                print(f"[飞书] msg_type={msg_type}, message_id={message_id}")
 
-            if msg_type == "file":
-                content_json = json.loads(msg.get("content", "{}"))
-                file_key = content_json.get("file_key", "")
-                file_name = content_json.get("file_name", "图纸.pdf")
-                print(f"[飞书] 收到文件: {file_name}, file_key={file_key}")
+                if msg_type == "file":
+                    content_json = json.loads(msg.get("content", "{}"))
+                    file_key = content_json.get("file_key", "")
+                    file_name = content_json.get("file_name", "图纸.pdf")
+                    print(f"[飞书] 收到文件: {file_name}, file_key={file_key}")
 
-                if not file_name.lower().endswith(".pdf"):
-                    await _feishu_reply(message_id, "请发送 PDF 格式的图纸文件。")
-                    return {"code": 0}
+                    if not file_name.lower().endswith(".pdf"):
+                        await _feishu_reply(message_id, "请发送 PDF 格式的图纸文件。")
+                        return {"code": 0}
 
-                await _feishu_reply(message_id, f"收到「{file_name}」，开始处理…")
+                    await _feishu_reply(message_id, f"收到「{file_name}」，开始处理…")
 
-                try:
-                    print(f"[飞书] 下载文件中...")
-                    token = _get_feishu_token()
-                    resp = httpx.get(
-                        f"https://open.feishu.cn/open-apis/im/v1/messages/{message_id}/resources/{file_key}",
-                        params={"type": "file"},
-                        headers={"Authorization": f"Bearer {token}"},
-                        timeout=60,
-                    )
-                    resp.raise_for_status()
-                    print(f"[飞书] 文件下载成功，大小: {len(resp.content)} 字节")
-
-                    print(f"[飞书] 开始处理 PDF...")
-                    img_bytes, summary = await process_pdf(resp.content)
-                    print(f"[飞书] PDF 处理完成，图片大小: {len(img_bytes)} 字节")
-
-                    # 上传图片到飞书
-                    img_buf = io.BytesIO(img_bytes)
-                    upload_resp = httpx.post(
-                        "https://open.feishu.cn/open-apis/im/v1/images",
-                        headers={"Authorization": f"Bearer {_get_feishu_token()}"},
-                        files={"image": ("quotation.png", img_buf, "image/png")},
-                        data={"image_type": "message"},
-                        timeout=30,
-                    )
-                    img_data = upload_resp.json()
-                    print(f"[飞书] 图片上传结果: {json.dumps(img_data, ensure_ascii=False)[:200]}")
-                    if img_data.get("code") == 0:
-                        image_key = img_data["data"]["image_key"]
-                        reply_resp = httpx.post(
-                            f"https://open.feishu.cn/open-apis/im/v1/messages/{message_id}/reply",
-                            headers={
-                                "Authorization": f"Bearer {_get_feishu_token()}",
-                                "Content-Type": "application/json",
-                            },
-                            json={"content": json.dumps({"image_key": image_key}), "msg_type": "image"},
-                            timeout=10,
+                    try:
+                        print(f"[飞书] 下载文件中...")
+                        token = _get_feishu_token()
+                        resp = httpx.get(
+                            f"https://open.feishu.cn/open-apis/im/v1/messages/{message_id}/resources/{file_key}",
+                            params={"type": "file"},
+                            headers={"Authorization": f"Bearer {token}"},
+                            timeout=60,
                         )
-                        print(f"[飞书] 图片发送结果: {reply_resp.status_code}")
+                        resp.raise_for_status()
+                        print(f"[飞书] 文件下载成功，大小: {len(resp.content)} 字节")
 
-                    await _feishu_reply(message_id, summary)
-                    print(f"[飞书] 处理完成")
+                        print(f"[飞书] 开始处理 PDF...")
+                        img_bytes, summary = await process_pdf(resp.content)
+                        print(f"[飞书] PDF 处理完成，图片大小: {len(img_bytes)} 字节")
 
-                except Exception as e:
-                    traceback.print_exc()
-                    await _feishu_reply(message_id, f"处理出错：{e}")
+                        # 上传图片到飞书
+                        img_buf = io.BytesIO(img_bytes)
+                        upload_resp = httpx.post(
+                            "https://open.feishu.cn/open-apis/im/v1/images",
+                            headers={"Authorization": f"Bearer {_get_feishu_token()}"},
+                            files={"image": ("quotation.png", img_buf, "image/png")},
+                            data={"image_type": "message"},
+                            timeout=30,
+                        )
+                        img_data = upload_resp.json()
+                        print(f"[飞书] 图片上传结果: {json.dumps(img_data, ensure_ascii=False)[:200]}")
+                        if img_data.get("code") == 0:
+                            image_key = img_data["data"]["image_key"]
+                            reply_resp = httpx.post(
+                                f"https://open.feishu.cn/open-apis/im/v1/messages/{message_id}/reply",
+                                headers={
+                                    "Authorization": f"Bearer {_get_feishu_token()}",
+                                    "Content-Type": "application/json",
+                                },
+                                json={"content": json.dumps({"image_key": image_key}), "msg_type": "image"},
+                                timeout=10,
+                            )
+                            print(f"[飞书] 图片发送结果: {reply_resp.status_code}")
+
+                        await _feishu_reply(message_id, summary)
+                        print(f"[飞书] 处理完成")
+
+                    except Exception as e:
+                        traceback.print_exc()
+                        await _feishu_reply(message_id, f"处理出错：{e}")
+                else:
+                    print(f"[飞书] 非文件消息，回复提示")
+                    await _feishu_reply(message_id, "请直接发送门窗 PDF 图纸文件，我将自动生成报价单。")
             else:
-                print(f"[飞书] 非文件消息，回复提示")
-                await _feishu_reply(message_id, "请直接发送门窗 PDF 图纸文件，我将自动生成报价单。")
-        else:
-            print(f"[飞书] 未处理的事件类型: {event_type}")
+                print(f"[飞书] 未处理的事件类型: {event_type}")
 
-        return {"code": 0}
-    except Exception as e:
-        print(f"[飞书] 未捕获异常: {e}")
-        traceback.print_exc()
-        return {"code": 1, "error": str(e)}
+            return {"code": 0}
+        except Exception as e:
+            print(f"[飞书] 未捕获异常: {e}")
+            traceback.print_exc()
+            return {"code": 1, "error": str(e)}
 
 
 _feishu_token_cache = {"token": None, "expire": 0}
